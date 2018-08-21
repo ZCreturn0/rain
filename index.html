@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>雨滴特效</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        #rain{
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="rain"></canvas>
+    <script>
+        var canvas = document.querySelector("#rain");
+        var rains = [];
+        var w,h;
+        (function(){
+            w = window.innerWidth;
+            h = window.innerHeight;
+            canvas.width = w;
+            canvas.height = h;
+            window.onresize = arguments.callee;
+        })();
+        var ctx = canvas.getContext("2d");
+        //雨滴
+        // var y = 0;
+        // setInterval(function(){
+        //     ctx.beginPath();
+        //     ctx.fillStyle = "#3ff";
+        //     ctx.fillRect(233,y++,2,10);
+        //     ctx.closePath();
+        //     ctx.fill();
+
+        //     ctx.beginPath();
+        //     ctx.fillStyle = 'rgba(0,0,0,0.03)';
+        //     ctx.fillRect(0,0,w,h);
+        //     ctx.closePath();
+        //     ctx.fill();
+        // },1000/60);
+
+        //雨滴绽放
+        // var r = 0;
+        // setInterval(function(){
+        //     ctx.beginPath();
+        //     ctx.strokeStyle = "#3ff";
+        //     ctx.arc(666,300,r++,0,Math.PI*2);
+        //     ctx.closePath();
+        //     ctx.stroke();
+        // },1000/60);
+
+        function random(min,max){
+            return Math.round(Math.random() * (max-min) + min);
+        }   
+
+        //Rain实例
+        function Rain(){};
+        Rain.prototype = {
+            init:function(){
+                this.x = random(0,w);
+                this.y = 0;
+                this.w = random(1,2);
+                this.h = random(8,12);
+                this.speed = random(1,3);
+                this.color = "#3ff";
+                this.ground = random(h*0.8,h*0.9);
+                this.r = 0;
+                this.rMax = random(50,100);
+                this.rSpeed = 1;
+                this.opacity = 1;
+                this.opacityAdded = 0.05;
+            },
+            draw:function(){
+                ctx.beginPath();
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x,this.y,this.w,this.h);
+                ctx.closePath();
+                ctx.fill();
+            },
+            move:function(){
+                if(this.y <= this.ground){
+                    this.y += this.speed;
+                    this.draw();
+                }else{
+                    if(this.r < this.rMax){
+                        ctx.beginPath();
+                        ctx.strokeStyle = 'rgba(3,255,255,'+this.opacity+')';//this.color;
+                        ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+                        ctx.closePath();
+                        ctx.stroke();
+                        this.r += this.rSpeed;
+                        if(this.r > this.rMax* 4/5 && this.opacity > 0){
+                            this.opacity -= this.opacityAdded;
+                        }                        
+                    }else{
+                        // ctx.beginPath();
+                        // ctx.fillStyle = 'black';
+                        // ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+                        // ctx.closePath();
+                        // ctx.fill();
+                        this.init();
+                    }
+                }
+            }
+        };
+
+        function createRain(num){
+            for(let i=0;i<num;i++)
+            {
+                setTimeout(() => {
+                    var rain = new Rain();
+                    rain.init();
+                    rain.draw();
+                    rains.push(rain);
+                }, 200*i);
+            }
+        }
+
+        createRain(66);
+        setInterval(() => {
+            ctx.beginPath();
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.fillRect(0,0,w,h);
+            ctx.closePath();
+            ctx.fill();
+            for(let item of rains)
+            {
+                item.move();
+            }
+        },1000/60);
+    </script>
+</body>
+</html>
